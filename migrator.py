@@ -27,6 +27,15 @@ class Migrator:
         ado_project: str,
         token_youtrack: Optional[str] = None,
     ):
+        """
+        Initialize the Migrator class with the necessary parameters for YouTrack and Azure DevOps.
+
+        :param token_azo: Personal Access Token for Azure DevOps
+        :param yt_base: Base URL for YouTrack instance
+        :param ado_organization: Azure DevOps organization URL
+        :param ado_project: Azure DevOps project name
+        :param token_youtrack: Optional token for YouTrack authentication
+        """
         self.yt_base = yt_base
         self.ado_base = f"{ado_organization}/{ado_project}/_apis/wit"
         self.auth_header_ado = self._authorization_header_ado(token_azo)
@@ -36,14 +45,33 @@ class Migrator:
 
     @staticmethod
     def _authorization_header_ado(pat: str) -> str:
+        """
+        Generate the authorization header for Azure DevOps using the provided Personal Access Token (PAT).
+
+        :param pat: Personal Access Token for Azure DevOps
+        :return: Authorization header string
+        """
         return "Basic " + base64.b64encode(f":{pat}".encode("ascii")).decode("ascii")
 
     @staticmethod
     def _authorization_header_youtrack(token: str) -> str:
+        """
+        Generate the authorization header for YouTrack using the provided token.
+
+        :param token: Token for YouTrack authentication
+        :return: Authorization header string
+        """
         return "Bearer " + token
 
     @staticmethod
     def _set_field(ado_field: str, yt_field: str) -> Dict[str, Optional[str]]:
+        """
+        Create a dictionary representing a field operation for Azure DevOps work item.
+
+        :param ado_field: Azure DevOps field name
+        :param yt_field: YouTrack field value
+        :return: Dictionary representing the field operation
+        """
         return {
             "op": "add",
             "path": f"/fields/{ado_field}",
@@ -53,9 +81,21 @@ class Migrator:
 
     @staticmethod
     def _format_yt_timestamp(timestamp: int) -> str:
+        """
+        Convert a YouTrack timestamp to ISO 8601 format.
+
+        :param timestamp: YouTrack timestamp in milliseconds
+        :return: ISO 8601 formatted timestamp
+        """
         return datetime.datetime.utcfromtimestamp(timestamp // 1000).isoformat()
 
     def _youtrack_issue_data(self, yt_id: str):
+        """
+        Retrieve issue data from YouTrack for the given issue ID.
+
+        :param yt_id: YouTrack issue ID
+        :return: Dictionary containing issue data
+        """
         # We take the list of custom field keys from
         # https://www.jetbrains.com/help/youtrack/standalone/api-howto-get-issues-with-all-values.html
         yt_fields = (
@@ -73,15 +113,33 @@ class Migrator:
 
     @staticmethod
     def _build_custom_field_dict(yt_data: Dict) -> Dict:
+        """
+        Build a dictionary of custom fields from YouTrack issue data.
+
+        :param yt_data: Dictionary containing YouTrack issue data
+        :return: Dictionary of custom fields
+        """
         return {v["name"]: v["value"] for v in yt_data["customFields"]}
 
     def custom_fields(self, yt_id: str) -> Dict:
+        """
+        Retrieve custom fields for a given YouTrack issue ID.
+
+        :param yt_id: YouTrack issue ID
+        :return: Dictionary of custom fields
+        """
         yt_data = self._youtrack_issue_data(yt_id)
         return self._build_custom_field_dict(yt_data)
 
     def migrate_issue(
         self, yt_id: str, custom_field_handler: CustomFieldHandler,
     ):
+        """
+        Migrate a single YouTrack issue to Azure DevOps.
+
+        :param yt_id: YouTrack issue ID
+        :param custom_field_handler: Function to handle custom fields during migration
+        """
         create_ops = []  # Operations to perform on new Azure DevOps work item
         yt_data = self._youtrack_issue_data(yt_id)
 
@@ -197,6 +255,13 @@ class Migrator:
         custom_field_handler: CustomFieldHandler,
         issue_count_upper_limit: int = 10000,
     ):
+        """
+        Migrate all issues from a YouTrack project to Azure DevOps.
+
+        :param yt_project: YouTrack project ID
+        :param custom_field_handler: Function to handle custom fields during migration
+        :param issue_count_upper_limit: Upper limit for the number of issues to migrate
+        """
         headers = {}
         if self.auth_header_youtrack:
             headers["Authorization"] = self.auth_header_youtrack
