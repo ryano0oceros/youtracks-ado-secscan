@@ -262,11 +262,11 @@ class Migrator:
 
 
 # Define your variables
-token_azo = "1OdqxDpm5OpVNxsATuGT6gRoAE5Vi0qVfkmgOCnN1Eoig6efHJb1JQQJ99ALACAAAAAAAAAAAAASAZDOk2UH"
-yt_base = "https://ryano0oceros.youtrack.cloud"
-ado_organization = "https://dev.azure.com/ryfal24"
+token_azo = ""
+yt_base = "https://UPDATE.youtrack.cloud"
+ado_organization = "https://dev.azure.com/UPDATE"
 ado_project = "boardtarget"
-token_youtrack = "perm:YWRtaW4=.NDYtMQ==.24d6Jq7uVl5BDdPOhPw6cdNW3b7z0u"  # Ensure this is set correctly
+token_youtrack = "perm:UPDATE"  # Ensure this is set correctly
 
 # Create an instance of the Migrator class
 migrator = Migrator(
